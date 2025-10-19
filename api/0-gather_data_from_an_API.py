@@ -4,20 +4,39 @@
 import requests
 import sys
 
-if __name__ == '__main__':
-    """gather data from an api"""
+
+def main():
+    """Fetch and display TODO progress for a given employee id."""
+    if len(sys.argv) != 2:
+        return
+
+    try:
+        employee_id = int(sys.argv[1])
+    except (ValueError, TypeError):
+        return
+
+    # Fetch todos for the user (note: endpoint must be /users/ not /user/)
     response_todos = requests.get(
-        "https://jsonplaceholder.typicode.com/user/" + sys.argv[1] + "/todos"
+        f"https://jsonplaceholder.typicode.com/users/{employee_id}/todos"
     )
     data = response_todos.json()
-    completed_tasks = []
-    for i in data:
-        if i['completed']:
-            completed_tasks.append(i['title'])
 
+    completed_tasks = []
+    for item in data:
+        if item.get('completed'):
+            completed_tasks.append(item.get('title'))
+
+    # Fetch user info
     user = requests.get(
-        "https://jsonplaceholder.typicode.com/users/" + sys.argv[1]
+        f"https://jsonplaceholder.typicode.com/users/{employee_id}"
     ).json()
+
     print("Employee {} is done with tasks({}/{}):".
-          format(user["name"], len(completed_tasks), len(data)))
-    [print("\t " + task) for task in completed_tasks]
+          format(user.get("name"), len(completed_tasks), len(data)))
+
+    for task in completed_tasks:
+        print("\t " + task)
+
+
+if __name__ == '__main__':
+    main()
