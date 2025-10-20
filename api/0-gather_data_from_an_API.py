@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Module for fetching employee TODO list progress from REST API
+Gather data from an API: Returns TODO list progress for a given employee ID
 """
 
 import requests
@@ -31,12 +31,21 @@ def get_employee_todo_progress(employee_id):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 0-gather_data_from_an_API.py <employee_id>")
-        sys.exit(1)
-    try:
-        employee_id = int(sys.argv[1])
-        get_employee_todo_progress(employee_id)
-    except ValueError:
-        print("Error: Employee ID must be an integer")
-        sys.exit(1)
+    employee_id = sys.argv[1]
+    # Fetch user
+    user_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
+    user = requests.get(user_url).json()
+    employee_name = user.get("name")
+
+    # Fetch todos
+    todos_url = f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}"
+    todos = requests.get(todos_url).json()
+
+    total_tasks = len(todos)
+    done_tasks = [task for task in todos if task.get("completed") is True]
+    number_done = len(done_tasks)
+
+    # Print in exact format
+    print(f"Employee {employee_name} is done with tasks({number_done}/{total_tasks}):")
+    for task in done_tasks:
+        print(f"\t {task.get('title')}")
