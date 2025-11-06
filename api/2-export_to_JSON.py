@@ -1,46 +1,28 @@
 #!/usr/bin/python3
 """
-Module for exporting employee TODO list to JSON format
+Uses https://jsonplaceholder.typicode.com along with an employee ID to
+return information about the employee's todo list progress
 """
 
 import json
 import requests
-import sys
+from sys import argv
 
-
-def export_to_json(employee_id):
-    """
-    Exports employee TODO list to JSON file
-    """
-    base_url = "https://jsonplaceholder.typicode.com"
-    user_response = requests.get(f"{base_url}/users/{employee_id}")
-    user_data = user_response.json()
-    user_id = user_data.get("id")
-    username = user_data.get("username")
-    todos_response = requests.get(f"{base_url}/users/{employee_id}/todos")
-    todos_data = todos_response.json()
-    tasks_list = []
-    for task in todos_data:
-        task_dict = {
-            "task": task.get("title"),
-            "completed": task.get("completed"),
-            "username": username
-        }
-        tasks_list.append(task_dict)
-    json_data = {str(user_id): tasks_list}
-    filename = f"{user_id}.json"
-    with open(filename, 'w') as jsonfile:
-        json.dump(json_data, jsonfile)
-    print(f"Data exported to {filename}")
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 2-export_to_JSON.py <employee_id>")
-        sys.exit(1)
-    try:
-        employee_id = int(sys.argv[1])
-        export_to_json(employee_id)
-    except ValueError:
-        print("Error: Employee ID must be an integer")
-        sys.exit(1)
+if __name__ == '__main__':
+    userId = argv[1]
+    user = requests.get("https://jsonplaceholder.typicode.com/users/{}".
+                        format(userId), verify=False).json()
+    todo = requests.get("https://jsonplaceholder.typicode.com/todos?userId={}".
+                        format(userId), verify=False).json()
+    username = user.get('username')
+    tasks = []
+    for task in todo:
+        task_dict = {}
+        task_dict["task"] = task.get('title')
+        task_dict["completed"] = task.get('completed')
+        task_dict["username"] = username
+        tasks.append(task_dict)
+    jsonobj = {}
+    jsonobj[userId] = tasks
+    with open("{}.json".format(userId), 'w') as jsonfile:
+        json.dump(jsonobj, jsonfile)
