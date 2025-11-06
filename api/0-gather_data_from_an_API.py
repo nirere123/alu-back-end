@@ -21,7 +21,9 @@ if __name__ == '__main__':
     ).json()
 
     # Filter completed tasks
-    completed_tasks = [task.get("title") for task in todos if task.get("completed")]
+    completed_tasks = [
+        task.get("title") for task in todos if task.get("completed")
+        ]
 
     # Print output
     print("Employee {} is done with tasks({}/{}):".format(
